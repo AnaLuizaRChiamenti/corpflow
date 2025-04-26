@@ -1,8 +1,15 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import "../../css/dashboard.css"; 
 
 export default function Dashboard() {
+  const handleLogout = () => {
+    localStorage.removeItem('token'); 
+    window.location.href = '/'; 
+  };
+  
   return (
     <>
       <div className="sidebar">
@@ -10,8 +17,8 @@ export default function Dashboard() {
           src="https://i.postimg.cc/W1xNjHP7/corpflow.png"
           alt="CorpFlow Logo"
           className="logo"
-          width={100}
-          height={100}
+          width={250}
+          height={130}
         />
         <div className="section">
           <h3>Blocos disponíveis</h3>
@@ -34,16 +41,16 @@ export default function Dashboard() {
             </button>
 
             <div className="dropdown-content">
-              <Link href="#">
+              <button href="#">
                 <Image
                   src="https://img.icons8.com/material-outlined/24/000000/user.png"
                   alt="Profile Icon"
                   width={24}
                   height={24}
                 />
-                Marta<br />Employee
-              </Link>
-              <Link href="#">
+                Profile
+              </button>
+              <button onClick={handleLogout}>
                 <Image
                   src="https://img.icons8.com/material-outlined/24/000000/logout-rounded.png"
                   alt="Logout Icon"
@@ -51,7 +58,7 @@ export default function Dashboard() {
                   height={24}
                 />
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         </div>
