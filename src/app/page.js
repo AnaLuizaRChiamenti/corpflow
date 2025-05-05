@@ -1,8 +1,28 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import "../css/login.css"; 
 
 export default function HomePage() {
+  const handleLogin = () => {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("userType").value;
+
+    const savedUser = JSON.parse(localStorage.getItem("userData"));
+    if (
+      savedUser &&
+      savedUser.username === username &&
+      savedUser.password === password &&
+      savedUser.role === role
+    ) {
+      window.location.href = `/dashboard`;
+    } else {
+      alert("Credenciais inválidas ou tipo de usuário incorreto!");
+    }
+  };
+
   return (
     <div className="container">
       <div className="left-section">
@@ -45,7 +65,10 @@ export default function HomePage() {
             <input type="password" id="password" placeholder="Digite sua senha" />
           </div>
 
-          <button className="login-button" id="loginButton">Entrar</button>
+          <button className="login-button" id="loginButton" onClick={handleLogin}>Entrar</button>
+          <p className="cadastro-text">
+            Ainda não tem conta? <Link href="/cadastro" className="cadastro-link">Cadastre-se</Link>
+          </p>
 
           <div className="social-icons">
             <Link href="https://www.instagram.com/corpflow/" target="_blank">
