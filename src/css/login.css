@@ -58,6 +58,17 @@ body{
     text-align: center;
 }
 
+.error-message {
+    background-color: #ffe6e6;
+    color: #d8000c;
+    border: 1px solid #d8000c;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
 .dropdown-container{
     display: flex;
     justify-content: space-between;

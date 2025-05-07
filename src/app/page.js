@@ -1,26 +1,37 @@
 'use client';
 
 import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
 import "../css/login.css"; 
 
 export default function HomePage() {
+  const [errorMsg, setErrorMsg] = useState('');
+
   const handleLogin = () => {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
     const role = document.getElementById("userType").value;
 
-    const savedUser = JSON.parse(localStorage.getItem("userData"));
-    if (
-      savedUser &&
-      savedUser.username === username &&
-      savedUser.password === password &&
-      savedUser.role === role
-    ) {
-      window.location.href = `/dashboard`;
-    } else {
-      alert("Credenciais inválidas ou tipo de usuário incorreto!");
+    if (!username || !password) {
+      setErrorMsg("Preencha todos os campos!");
+      return;
     }
+
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const user = users.find(
+      u => u.username === username && u.password === password && u.role === role
+    );
+
+    if (!user) {
+      setErrorMsg("Usuário ou senha incorretos!");
+      return;
+    } else{
+      localStorage.setItem("userLogado", JSON.stringify(user));
+      window.location.href = '/dashboard'; 
+    }
+    
   };
 
   return (
@@ -46,6 +57,8 @@ export default function HomePage() {
             width={250}
             height={200}
           />
+
+          {errorMsg && <div className="error-message">{errorMsg}</div>}
 
           <div className="dropdown-container">
             <label htmlFor="userType">Entrar como:</label>

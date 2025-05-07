@@ -1,10 +1,14 @@
 'use client';
 
 import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
 import "../../css/cadastro.css";
 
 export default function CadastroPage() {
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
   const handleCadastro = () => {
     const name = document.getElementById("nameCadastro").value;
     const username = document.getElementById("usernameCadastro").value;
@@ -12,16 +16,29 @@ export default function CadastroPage() {
     const role = document.getElementById("userType").value;
 
     if (!name || !username || !password) {
-      alert("Preencha todos os campos!");
+      setErrorMsg("Preencha todos os campos!");
+      setSuccessMsg('');
       return;
     }
 
-    const novoUsuario = { name, username, password, role };
+    const usersSalvos = JSON.parse(localStorage.getItem("users")) || [];
+    const userExistente = usersSalvos.find(u => u.username === username);
 
-    localStorage.setItem("userData", JSON.stringify(novoUsuario));
+    if (userExistente) {
+      setErrorMsg("Usuário já existe!");
+      setSuccessMsg('');
+      return;
+    }
 
-    alert("Cadastro realizado com sucesso!");
-    window.location.href = "/";
+    const novoUsuario = {name, username, password, role};
+    usersSalvos.push(novoUsuario);
+    localStorage.setItem("users", JSON.stringify(usersSalvos));
+
+    setErrorMsg('');
+    setSuccessMsg("Usuário cadastrado com sucesso!");
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
   };
 
   return (  
@@ -37,6 +54,8 @@ export default function CadastroPage() {
       </div>
       <div className="cadastro-box">
           <h1 style={{ color: "#003087" }}>Cadastro</h1>
+          {errorMsg && <div className="error-message">{errorMsg}</div>}
+          {successMsg && <div className="success-message">{successMsg}</div>}
         <div className="dropdown-container">
           <label htmlFor="userType">Cadastrar-se como:</label>
           <select id="userType">

@@ -45,6 +45,28 @@ h1::after{
     background-color: #003087;
 }
 
+.error-message {
+    background-color: #ffe6e6;
+    color: #d8000c;
+    border: 1px solid #d8000c;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+.success-message {
+    background-color: #e6ffed;
+    color: #007e33;
+    border: 1px solid #007e33;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
 .cadastro-box{
     margin-top: 10px;
     width: 150%;
