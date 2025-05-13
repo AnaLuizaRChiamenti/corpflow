@@ -505,6 +505,8 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -514,6 +516,7 @@ body {
 
 .modal {
   background-color: white;
+  padding: 20px;
   border-radius: 8px;
   width: 400px;
   max-width: 90%;
@@ -524,7 +527,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 0px 5px 8px 5px;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -575,7 +578,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 16px;
+  padding: 10px;
   border-top: 1px solid #e0e0e0;
 }
 

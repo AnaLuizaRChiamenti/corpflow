@@ -22,9 +22,11 @@ const TaskCard = ({ task, index, moveCard, listId }) => {
         <span className={`priority ${task.priority}`}>{task.priority}</span>
       </div>
       <p>{task.description}</p>
+     <div className="task-card-footer">
+      <span className="due-date">Prazo: {task.dueDate}</span>
+    </div>
       <div className="task-card-footer">
-        <span className="due-date">Prazo: {task.dueDate}</span>
-        <div className="avatar">{task.assignee.substring(0, 2).toUpperCase()}</div>
+        <span className="assignee">{task.assignee}</span>
       </div>
     </div>
   )
@@ -83,8 +85,9 @@ const TaskList = ({ title, tasks, listId, moveCard, onRemoveColumn }) => {
 }
 
 export default function Dashboard() {
+  const [tasks, setTasks] = useState([])
   const [columns, setColumns] = useState({
-    todo: {
+    /*todo: {
       title: "A fazer",
       items: [
         {
@@ -130,9 +133,12 @@ export default function Dashboard() {
           assignee: "Carlos",
         },
       ],
-    },
+    }, */
   })
 
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false)
+  const [newTaskName, setNewTaskName] = useState("")
+  const [newTaskDueDate, setnewTaskDueDate] = useState("")
   const [showNewColumnModal, setShowNewColumnModal] = useState(false)
   const [newColumnName, setNewColumnName] = useState("")
   
@@ -163,6 +169,34 @@ export default function Dashboard() {
         },
       }
     })
+  }
+
+  const addNewTask = () => {
+    if (!newTaskName.trim()) return
+    const taskId = Date.now()
+    const newTask = {
+      id: taskId,
+      title: newTaskName,
+      //{description: "Descrição da tarefa",}
+      //priority: "média",
+      dueDate: newTaskDueDate,
+      assignee: "Marta",
+    }
+
+    const firstColumnId = Object.keys(columns)[0]
+  if (!firstColumnId) return // nenhuma coluna existente
+
+  setColumns((prevColumns) => ({
+    ...prevColumns,
+    [firstColumnId]: {
+      ...prevColumns[firstColumnId],
+      items: [...prevColumns[firstColumnId].items, newTask],
+    },
+  }))
+    
+    setShowNewTaskModal(false)
+    setNewTaskName("")
+    setnewTaskDueDate("")
   }
 
   const addNewColumn = () => {
@@ -293,7 +327,7 @@ export default function Dashboard() {
           <div className="task-header">
             <h2>Minhas tarefas</h2>
             <div className="task-actions">
-              <button className="create-task-button">+ Nova tarefa</button>
+              <button className="create-task-button" onClick={() => setShowNewTaskModal(true)}>+ Nova tarefa</button>
               <button className="create-column-button" onClick={() => setShowNewColumnModal(true)}>
                 + Nova coluna
               </button>
@@ -317,6 +351,61 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Modal para adicionar nova tarefa */}
+      {showNewTaskModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Nova Tarefa</h3>
+              <button className="close-modal" onClick={() => setShowNewTaskModal(false)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="input-group">
+                <label htmlFor="taskName">Nome da tarefa</label>
+                <input
+                  type="text"
+                  id="taskName"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  placeholder="Digite o nome da tarefa"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="taskDueDate">Prazo</label>
+                <input
+                  type="date"
+                  id="taskDueDate"
+                  value={newTaskDueDate}
+                  onChange={(e) => setnewTaskDueDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-button" onClick={() => setShowNewTaskModal(false)}>
+                Cancelar
+              </button>
+              <button className="confirm-button" onClick={addNewTask}>
+                Adicionar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Modal para adicionar nova coluna */}
       {showNewColumnModal && (
         <div className="modal-overlay">
