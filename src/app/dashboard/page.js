@@ -122,7 +122,7 @@ const TaskList = ({ title, tasks, listId, moveCard, onRemoveColumn, onDropBlock,
             role={role}
           />
         ))}
-        {listId === "concluído" && tasks.length > 5 && (
+        {listId === "concluído" && tasks.length > 4 && (
           <button className="show-more-btn" onClick={() => setShowAllCompletedModal(true)}>
             Mostrar mais
           </button>
