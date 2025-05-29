@@ -66,7 +66,7 @@ const Block = ({ type, role }) => {
 };
 
 const TaskList = ({ title, tasks, listId, moveCard, onRemoveColumn, onDropBlock, role, maxTasks = Infinity, setShowAllCompletedModal }) => {
-  const displayedTasks = tasks.slice(0, maxTasks);
+const displayedTasks = tasks.slice(0, maxTasks); 
 
   const [, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -150,14 +150,18 @@ export default function Dashboard() {
       typeof task.id === 'number' &&
       typeof task.title === 'string' &&
       typeof task.columnId === 'string' &&
-      ['todo', 'waitingApproval', 'inProgress', 'concluído'].includes(task.columnId)
+      ['todo', 'waitingApproval', 'inProgress', 'concluído'].includes(task.columnId) &&
+      typeof task.createdBy === 'string' &&
+      typeof task.description === 'string' &&
+      typeof task.dueDate === 'string' &&
+      ['alta', 'média', 'baixa'].includes(task.priority?.toLowerCase() || '')
     );
   };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const userLogado = JSON.parse(localStorage.getItem("userLogado"));
-      if (userLogado) {
+      const userLogado = JSON.parse(localStorage.getItem("userLogado") || '{}');
+      if (userLogado && userLogado.name && userLogado.role) {
         setUser(userLogado);
       } else {
         window.location.href = "/";
@@ -200,7 +204,7 @@ export default function Dashboard() {
   }, [errorMsg]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && tasks.length > 0) {
       try {
         localStorage.setItem("sharedTasks", JSON.stringify(tasks));
         localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
@@ -228,17 +232,24 @@ export default function Dashboard() {
     };
 
     tasks.forEach((task) => {
+      if (!task || !task.columnId) {
+        console.warn('Invalid task detected:', task);
+        return;
+      }
       if (task.completed) {
         columns.concluído.items.push(task);
       } else {
-        columns[task.columnId].items.push(task);
+        if (columns[task.columnId]) {
+          columns[task.columnId].items.push(task);
+        } else {
+          console.warn(`Task with invalid columnId: ${task.columnId}`, task);
+        }
       }
     });
 
     Object.keys(columns).forEach((colId) => {
       columns[colId].items = sortTasksByPriority(columns[colId].items);
     });
-
     return columns;
   };
 
@@ -255,7 +266,11 @@ export default function Dashboard() {
     if (sourceListId === targetListId) return;
     setTasks((prevTasks) => {
       const task = prevTasks.find((t) => t.id === cardId);
-      if (!task) return prevTasks;
+      if (!task) {
+        console.warn(`Task with ID ${cardId} not found`);
+        return prevTasks;
+      }
+      console.log(`Moving task ${cardId} from ${sourceListId} to ${targetListId}`);
       return sortTasksByPriority([
         ...prevTasks.filter((t) => t.id !== cardId),
         { ...task, columnId: targetListId },
@@ -275,9 +290,7 @@ export default function Dashboard() {
       !newTask.dueDate ||
       !["alta", "média", "baixa"].includes(newTask.priority.toLowerCase())
     ) {
-      setErrorMsg(
-        "Preencha todos os campos corretamente!"
-      );
+      setErrorMsg("Preencha todos os campos corretamente!");
       return;
     }
 
@@ -297,7 +310,12 @@ export default function Dashboard() {
       completed: false,
     };
 
-    setTasks((prevTasks) => sortTasksByPriority([...prevTasks, task]));
+    setTasks((prevTasks) => {
+      const updatedTasks = sortTasksByPriority([...prevTasks, task]);
+      console.log('New task added:', task);
+      console.log('Updated tasks:', updatedTasks);
+      return updatedTasks;
+    });
     setNewTask({ title: "", description: "", dueDate: "", priority: "média" });
     setShowNewTaskModal(false);
     setErrorMsg("");
@@ -306,7 +324,10 @@ export default function Dashboard() {
   const onDropBlock = (taskId, listId, blockType) => {
     setTasks((prevTasks) => {
       const task = prevTasks.find((t) => t.id === taskId);
-      if (!task) return prevTasks;
+      if (!task) {
+        console.warn(`Task with ID ${taskId} not found`);
+        return prevTasks;
+      }
 
       if (blockType === "Aprovado" && user?.role !== "gerente") {
         setErrorMsg("Somente gerentes podem aprovar tarefas!");
@@ -436,34 +457,34 @@ export default function Dashboard() {
           </button>
         </div>
         <div className="sidebar-content">
-        <div className="section">
-          <h3>Blocos disponíveis</h3>
-          <div className="block-section">
-            {availableBlocks.map((block) => (
-              <Block key={block} type={block} role={user?.role} />
-            ))}
+          <div className="section">
+            <h3>Blocos disponíveis</h3>
+            <div className="block-section">
+              {availableBlocks.map((block) => (
+                <Block key={block} type={block} role={user?.role} />
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="section completed-tasks-section">
-          <h3>Tarefas concluídas: {completedTasks.length}</h3>
-          <div className="completed-tasks-list">
-            {completedTasks.slice(0, 6).map((task) => (
-              <button
-                key={task.id}
-                className="completed-task completed-task-style"
-                onClick={() => setShowTaskDetails(task)}
-              >
-                {task.title}
+          <div className="section completed-tasks-section">
+            <h3>Tarefas concluídas: {completedTasks.length}</h3>
+            <div className="completed-tasks-list">
+              {completedTasks.slice(0, 6).map((task) => (
+                <button
+                  key={task.id}
+                  className="completed-task completed-task-style"
+                  onClick={() => setShowTaskDetails(task)}
+                >
+                  {task.title}
+                </button>
+              ))}
+            </div>
+            {completedTasks.length > 6 && (
+              <button className="show-more-btn" onClick={() => setShowAllCompletedModal(true)}>
+                Mostrar mais
               </button>
-            ))}
+            )}
           </div>
-          {completedTasks.length > 6 && (
-            <button className="show-more-btn" onClick={() => setShowAllCompletedModal(true)}>
-              Mostrar mais
-            </button>
-          )}
         </div>
-      </div>
       </div>
       <div className={`main-content ${sidebarCollapsed ? "expanded" : ""}`}>
         <div className="header">
@@ -642,7 +663,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {(showTaskDetails) && (
+      {showTaskDetails && (
         <div className="modal-overlay" style={{ zIndex: showAllCompletedModal ? 1001 : 1000 }}>
           <div className="modal">
             <div className="modal-header">
