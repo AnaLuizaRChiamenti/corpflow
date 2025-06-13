@@ -161,7 +161,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const userLogado = JSON.parse(localStorage.getItem("userLogado") || '{}');
-      if (userLogado && userLogado.name && userLogado.role) {
+      if (userLogado && userLogado.username && userLogado.role) {
         setUser(userLogado);
       } else {
         window.location.href = "/";
@@ -385,9 +385,9 @@ export default function Dashboard() {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
-  const getInitials = (name) => {
-    if (!name) return "??";
-    const names = name.trim().split(" ");
+  const getInitials = (username) => {
+    if (!username) return "??";
+    const names = username.trim().split(" ");
     const initials = names
       .slice(0, 2)
       .map((n) => n[0]?.toUpperCase())
@@ -465,33 +465,14 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
-          <div className="section completed-tasks-section">
-            <h3>Tarefas concluídas: {completedTasks.length}</h3>
-            <div className="completed-tasks-list">
-              {completedTasks.slice(0, 6).map((task) => (
-                <button
-                  key={task.id}
-                  className="completed-task completed-task-style"
-                  onClick={() => setShowTaskDetails(task)}
-                >
-                  {task.title}
-                </button>
-              ))}
-            </div>
-            {completedTasks.length > 6 && (
-              <button className="show-more-btn" onClick={() => setShowAllCompletedModal(true)}>
-                Mostrar mais
-              </button>
-            )}
-          </div>
         </div>
       </div>
       <div className={`main-content ${sidebarCollapsed ? "expanded" : ""}`}>
         <div className="header">
           <div className="dropdown">
             <button className="dropdown-button">
-              <span>Bem vindo(a), {user?.name || "Usuário"}</span>
-              <div className="avatar">{user ? getInitials(user.name) : "??"}</div>
+              <span>Bem vindo(a), {user?.username || "Usuário"}</span>
+              <div className="avatar">{user ? getInitials(user.username) : "??"}</div>
             </button>
             <div className="dropdown-content">
               <button onClick={handleLogout}>
@@ -622,25 +603,6 @@ export default function Dashboard() {
       {showAllCompletedModal && (
         <div className="modal-overlay">
           <div className="modal">
-            <div className="modal-header">
-              <h3>Todas as Tarefas Concluídas</h3>
-              <button className="close-modal" onClick={() => setShowAllCompletedModal(false)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
             <div className="modal-body">
               <ul>
                 {completedTasks.map((task) => (
