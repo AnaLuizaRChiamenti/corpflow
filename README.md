@@ -23,20 +23,20 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 ## Instruções do Corpflow
 
 1. Criar Contas:  
-Clique no botão de cadastro e crie uma conta de gerente.
+Clique no botão de cadastro e crie uma conta de funcionário e uma de gerente.
 
 2. Login como Gerente:  
 Faça login com a conta de gerente.
 
 3. Criar Tarefa:  
-Em novas tarefa, crie uma tarefa.
+Em novas tarefa, crie uma tarefa e atribua ao funcionário.
 
-4. Testar Aprovação e Verificação:    
+4. Testar Aprovação e Verificação:  
 Tente aprovar a tarefa e observe o erro (é necessário verificar antes).  
-Tente também concluir, mas não será possível pois é necessário a verificação e aprovação.  
-Verifique e aprove a tarefa, depois apenas conclua.
+Verifique e, depois, aprove a tarefa.
 
-5. Dashboard funcionário (opcional):  
-Faça logout e crie uma conta para o funcionário.  
-Ao fazer login com a conta de funcionário, o dashboard está diferente, o único bloco disponível é o concluído.  
-O aprovar e o verificar só estão disponíveis na dashboard do gerente.
+5. Login como Funcionário:  
+Faça logout e entre com a conta de funcionário.
+
+6. Concluir Tarefa:  
+Visualize a tarefa que foi criada e marque como concluída.

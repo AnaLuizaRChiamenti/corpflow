@@ -11,11 +11,12 @@ export default function CadastroPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const handleCadastro = () => {
+    const name = document.getElementById("nameCadastro").value;
     const username = document.getElementById("usernameCadastro").value;
     const password = document.getElementById("passwordCadastro").value;
     const role = document.getElementById("userType").value;
 
-    if (!username || !password) {
+    if (!name || !username || !password) {
       setErrorMsg("Preencha todos os campos!");
       setSuccessMsg('');
       return;
@@ -27,7 +28,7 @@ export default function CadastroPage() {
       return;
     }
 
-    const usersSalvos = JSON.parse(localStorage.getItem("users")) || [];
+    const usersSalvos = JSON.parse(sessionStorage.getItem("users")) || [];
     const userExistente = usersSalvos.find(u => u.username === username);
 
     if (userExistente) {
@@ -36,9 +37,9 @@ export default function CadastroPage() {
       return;
     }
 
-    const novoUsuario = { username, password, role };
+    const novoUsuario = { name, username, password, role };
     usersSalvos.push(novoUsuario);
-    localStorage.setItem("users", JSON.stringify(usersSalvos));
+    sessionStorage.setItem("users", JSON.stringify(usersSalvos));
 
     setErrorMsg('');
     setSuccessMsg("Usuário cadastrado com sucesso!");
@@ -68,6 +69,10 @@ export default function CadastroPage() {
             <option value="gerente">Gerente</option>
             <option value="funcionario">Funcionário</option>
           </select>
+        </div>
+        <div className="input-group">
+          <label>Nome</label>
+          <input type="text" id="nameCadastro" placeholder="Digite seu nome" />
         </div>
         <div className="input-group">
           <label>Usuário</label>
