@@ -36,6 +36,7 @@ const TaskCard = ({ task, index, moveCard, listId, onDropBlock, role }) => {
       <p>{task.description}</p>
       <div className="task-card-footer">
         <span className="due-date">Prazo: {task.dueDate}</span>
+        {task.assignedTo && <span className="assigned-to">Atribuído a: {task.assignedTo}</span>}
       </div>
       <div className="task-blocks">
         {task.blocks?.map((block, idx) => (
@@ -66,7 +67,7 @@ const Block = ({ type, role }) => {
 };
 
 const TaskList = ({ title, tasks, listId, moveCard, onRemoveColumn, onDropBlock, role, maxTasks = Infinity, setShowAllCompletedModal }) => {
-const displayedTasks = tasks.slice(0, maxTasks); 
+  const displayedTasks = tasks.slice(0, maxTasks); 
 
   const [, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -139,10 +140,11 @@ export default function Dashboard() {
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
   const [showTaskDetails, setShowTaskDetails] = useState(null);
   const [showAllCompletedModal, setShowAllCompletedModal] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "", priority: "média" });
+  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "", priority: "média", assignedTo: "" });
   const [errorMsg, setErrorMsg] = useState("");
   const [completedTasks, setCompletedTasks] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
   const validateTask = (task) => {
     return (
@@ -154,7 +156,8 @@ export default function Dashboard() {
       typeof task.createdBy === 'string' &&
       typeof task.description === 'string' &&
       typeof task.dueDate === 'string' &&
-      ['alta', 'média', 'baixa'].includes(task.priority?.toLowerCase() || '')
+      ['alta', 'média', 'baixa'].includes(task.priority?.toLowerCase() || '') &&
+      (task.assignedTo === undefined || typeof task.assignedTo === 'string' || task.assignedTo === "Todos")
     );
   };
 
@@ -167,6 +170,10 @@ export default function Dashboard() {
         window.location.href = "/";
       }
       setIsLoading(false);
+
+      const savedUsers = JSON.parse(localStorage.getItem("users") || '[]');
+      const employeeList = savedUsers.filter(u => u.role === "funcionario");
+      setEmployees(employeeList);
 
       const savedCompletedTasks = localStorage.getItem("completedTasks");
       try {
@@ -237,12 +244,16 @@ export default function Dashboard() {
         return;
       }
       if (task.completed) {
-        columns.concluído.items.push(task);
+        if (user.role === "gerente" || task.createdBy === user.name || task.assignedTo === "Todos" || task.assignedTo === user.name) {
+          columns.concluído.items.push(task);
+        }
       } else {
-        if (columns[task.columnId]) {
-          columns[task.columnId].items.push(task);
-        } else {
-          console.warn(`Task with invalid columnId: ${task.columnId}`, task);
+        if (user.role === "gerente" || task.createdBy === user.name || task.assignedTo === "Todos" || task.assignedTo === user.name) {
+          if (columns[task.columnId]) {
+            columns[task.columnId].items.push(task);
+          } else {
+            console.warn(`Task with invalid columnId: ${task.columnId}`, task);
+          }
         }
       }
     });
@@ -288,9 +299,11 @@ export default function Dashboard() {
       !newTask.title.trim() ||
       !newTask.description.trim() ||
       !newTask.dueDate ||
-      !["alta", "média", "baixa"].includes(newTask.priority.toLowerCase())
+      !["alta", "média", "baixa"].includes(newTask.priority.toLowerCase()) ||
+      !newTask.assignedTo ||
+      !employees.some(emp => emp.name === newTask.assignedTo)
     ) {
-      setErrorMsg("Preencha todos os campos corretamente!");
+      setErrorMsg("Preencha todos os campos corretamente, incluindo o destinatário!");
       return;
     }
 
@@ -308,6 +321,7 @@ export default function Dashboard() {
       columnId: "todo",
       blocks: [],
       completed: false,
+      assignedTo: newTask.assignedTo,
     };
 
     setTasks((prevTasks) => {
@@ -316,7 +330,7 @@ export default function Dashboard() {
       console.log('Updated tasks:', updatedTasks);
       return updatedTasks;
     });
-    setNewTask({ title: "", description: "", dueDate: "", priority: "média" });
+    setNewTask({ title: "", description: "", dueDate: "", priority: "média", assignedTo: "" });
     setShowNewTaskModal(false);
     setErrorMsg("");
   };
@@ -364,6 +378,7 @@ export default function Dashboard() {
                 title: task.title,
                 description: task.description,
                 dueDate: task.dueDate,
+                assignedTo: task.assignedTo,
               },
             ];
             return updatedCompletedTasks;
@@ -433,6 +448,7 @@ export default function Dashboard() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
+ Ninth
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -464,6 +480,28 @@ export default function Dashboard() {
                 <Block key={block} type={block} role={user?.role} />
               ))}
             </div>
+          </div>
+          <div className="section completed-tasks-section">
+            <h3>Tarefas concluídas: {completedTasks.filter(task => user.role === "gerente" || task.assignedTo === user.name).length}</h3>
+            <div className="completed-tasks-list">
+              {completedTasks
+                .filter(task => user.role === "gerente" || task.assignedTo === user.name)
+                .slice(0, 6)
+                .map((task) => (
+                  <button
+                    key={task.id}
+                    className="completed-task completed-task-style"
+                    onClick={() => setShowTaskDetails(task)}
+                  >
+                    {task.title}
+                  </button>
+                ))}
+            </div>
+            {completedTasks.filter(task => user.role === "gerente" || task.assignedTo === user.name).length > 6 && (
+              <button className="show-more-btn" onClick={() => setShowAllCompletedModal(true)}>
+                Mostrar mais
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -533,7 +571,7 @@ export default function Dashboard() {
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
+                  viewJar="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -587,6 +625,24 @@ export default function Dashboard() {
                   <option value="baixa">Baixa</option>
                 </select>
               </div>
+              <div className="input-group">
+                <label htmlFor="taskAssignee">Destinatário</label>
+                <select
+                  id="taskAssignee"
+                  value={newTask.assignedTo}
+                  onChange={(e) => {
+                    console.log('Selected employee:', e.target.value);
+                    setNewTask({ ...newTask, assignedTo: e.target.value });
+                  }}
+                >
+                  <option value="">Selecione um funcionário</option>
+                  {employees.map((employee) => (
+                    <option key={employee.username} value={employee.name}>
+                      {employee.name} ({employee.username})
+                    </option>
+                  ))}
+                </select>
+              </div>
               {errorMsg && <div className="error-message">{errorMsg}</div>}
             </div>
             <div className="modal-footer">
@@ -605,16 +661,18 @@ export default function Dashboard() {
           <div className="modal">
             <div className="modal-body">
               <ul>
-                {completedTasks.map((task) => (
-                  <li
-                    key={task.id}
-                    className="completed-task-style"
-                    onClick={() => setShowTaskDetails(task)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {task.title}
-                  </li>
-                ))}
+                {completedTasks
+                  .filter(task => user.role === "gerente" || task.assignedTo === user.name)
+                  .map((task) => (
+                    <li
+                      key={task.id}
+                      className="completed-task-style"
+                      onClick={() => setShowTaskDetails(task)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {task.title}
+                    </li>
+                  ))}
               </ul>
             </div>
             <div className="modal-footer">
@@ -656,6 +714,9 @@ export default function Dashboard() {
               </div>
               <div className="task-detail">
                 <strong>Prazo:</strong> {showTaskDetails.dueDate}
+              </div>
+              <div className="task-detail">
+                <strong>Destinatário:</strong> {showTaskDetails.assignedTo}
               </div>
             </div>
             <div className="modal-footer">

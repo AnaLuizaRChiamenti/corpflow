@@ -498,6 +498,12 @@ body {
     font-size: 12px;
 }
 
+.task-card-footer .assigned-to {
+    margin-left: 10px;
+    color: #555;
+    font-size: 12px;
+}
+
 .task-card-footer .avatar {
     width: 24px;
     height: 24px;
